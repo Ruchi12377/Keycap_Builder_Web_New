@@ -71,7 +71,6 @@ export default function Workspace({ initialMode }: Props) {
       </Box>
       <Grid container sx={{ height: '100%', flexGrow: 1 }}>
         <Grid
-          item
           xs={4}
           sx={{ borderRight: 1, height: '80%', borderColor: '#ccc', pt: 2 }}
         >
@@ -86,11 +85,10 @@ export default function Workspace({ initialMode }: Props) {
           {mode === 'libraries' && <Libraries />}
           {mode === 'fonts' && <Fonts />}
         </Grid>
-        <Grid item xs={8} sx={{ height: '80%', position: 'relative' }}>
+        <Grid xs={8} sx={{ height: '80%', position: 'relative' }}>
           <Preview />
         </Grid>
         <Grid
-          item
           xs={4}
           sx={{
             height: '20%',
@@ -102,7 +100,6 @@ export default function Workspace({ initialMode }: Props) {
           <Buttons code={code} parameters={parameters} />
         </Grid>
         <Grid
-          item
           xs={8}
           sx={{
             height: '20%',
