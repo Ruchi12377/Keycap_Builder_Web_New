@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import React, { useEffect } from 'react';
-
 import { Parameter } from '../lib/openSCAD/parseParameter';
 import parseOpenScadParameters from '../lib/openSCAD/parseParameter';
 import Buttons from './Workspace/Buttons';
@@ -9,28 +8,22 @@ import CodeEditor from './Workspace/CodeEditor';
 import Console from './Workspace/Console';
 import Customizer from './Workspace/Customizer';
 import FileSystem from './Workspace/FileSystem';
-import Fonts from './Workspace/Fonts';
-import Libraries from './Workspace/Libraries';
 import Preview from './Workspace/Preview';
 import Sidebar from './Workspace/Sidebar';
 import { useOpenSCADProvider } from './providers/OpenscadWorkerProvider';
 import { useWorkspaceProvider } from './providers/WorkspaceProvider';
+import { useFileSystemProvider } from './providers/FileSystemProvider';
 
 export type EditorMode =
   | 'editor'
   | 'customizer'
-  | 'file'
-  | 'libraries'
-  | 'fonts';
+  | 'file';
 
-interface Props {
-  initialMode: EditorMode;
-}
-
-export default function Workspace({ initialMode }: Props) {
+export default function Workspace() {
   const { preview, previewFile, isRendering } = useOpenSCADProvider();
+  const { files } = useFileSystemProvider();
   const { code } = useWorkspaceProvider();
-  const [mode, setMode] = React.useState<EditorMode>(initialMode || 'editor');
+  const [mode, setMode] = React.useState<EditorMode>('customizer');
   const [parameters, setParameters] = React.useState<Parameter[]>([]);
 
   // Whenever the code changes, attempt to parse the parameters
@@ -64,6 +57,21 @@ export default function Workspace({ initialMode }: Props) {
     }
   }, [code]);
 
+  // Hydrate font options
+  useEffect(() => {
+    console.log(parameters.filter((p) => p.isFont));
+    parameters.filter((p) => p.isFont).forEach((p) => {
+      console.log(p);
+      p.options = files
+        .filter((f) => f.type === 'font')
+        .map((f) => {
+          const nameWithoutExt = f.name.replace(/\.[^/.]+$/, "");
+          return { value: nameWithoutExt, label: nameWithoutExt };
+        });
+      console.log(p.options);
+    });
+  }, [files, parameters]);
+
   return (
     <Box sx={{ display: 'flex', height: '100%' }}>
       <Box sx={{ height: '100%', borderRight: '1px solid #ccc', p: 1 }}>
@@ -71,7 +79,7 @@ export default function Workspace({ initialMode }: Props) {
       </Box>
       <Grid container sx={{ height: '100%', flexGrow: 1 }}>
         <Grid
-          xs={4}
+          size={{ xs: 4 }}
           sx={{ borderRight: 1, height: '80%', borderColor: '#ccc', pt: 2 }}
         >
           {mode === 'customizer' && (
@@ -82,14 +90,12 @@ export default function Workspace({ initialMode }: Props) {
           )}
           {mode === 'editor' && <CodeEditor />}
           {mode === 'file' && <FileSystem />}
-          {mode === 'libraries' && <Libraries />}
-          {mode === 'fonts' && <Fonts />}
         </Grid>
-        <Grid xs={8} sx={{ height: '80%', position: 'relative' }}>
+        <Grid size={{ xs: 8 }} sx={{ height: '80%', position: 'relative' }}>
           <Preview />
         </Grid>
         <Grid
-          xs={4}
+          size={{ xs: 4 }}
           sx={{
             height: '20%',
             borderRight: 1,
@@ -100,7 +106,7 @@ export default function Workspace({ initialMode }: Props) {
           <Buttons code={code} parameters={parameters} />
         </Grid>
         <Grid
-          xs={8}
+          size={{ xs: 8 }}
           sx={{
             height: '20%',
             overflow: 'scroll',

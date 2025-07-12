@@ -38,6 +38,7 @@
     "@react-three/drei": "^10.5.0",
     "@react-three/fiber": "^9.2.0",
     "@zip.js/zip.js": "^2.7.63",
+    "cors-anywhere": "^0.4.4",
     "mui-chips-input": "^7.0.1",
     "notistack": "^3.0.2",
     "react": "^19.1.0",

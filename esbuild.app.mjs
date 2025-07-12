@@ -29,10 +29,12 @@ export default (opt_options) => {
         resolveFrom: 'cwd',
         assets: {
           from: [
-            './public/*.png',
-            './public/*.ico',
-            './public/*.webmanifest',
-            './public/*.ttf',
+            './public/**/*.png',
+            './public/**/*.ico',
+            './public/**/*.webmanifest',
+            './public/**/*.ttf',
+            './public/**/*.scad',
+            './public/**/*.json',
           ],
           to: ['./dist'],
         },

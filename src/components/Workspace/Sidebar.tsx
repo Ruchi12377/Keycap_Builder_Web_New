@@ -26,11 +26,10 @@ export default function Sidebar({ onChange, mode }: Props) {
   };
 
   const buttons = [
-    { value: 'editor', icon: <CodeIcon />, label: 'Script Editor' },
-    { value: 'customizer', icon: <TuneIcon />, label: 'Customizer' },
-    { value: 'file', icon: <FolderIcon />, label: 'File Manager' },
-    { value: 'libraries', icon: <LibraryBooksIcon />, label: 'Libraries' },
-    { value: 'fonts', icon: <FontDownloadIcon />, label: 'Fonts' },
+    { value: "customizer", icon: <TuneIcon />, label: "Customizer" },
+    { value: "fonts", icon: <FontDownloadIcon />, label: "Fonts" },
+    { value: "editor", icon: <CodeIcon />, label: "Script Editor" },
+    { value: "file", icon: <FolderIcon />, label: "File Manager" },
   ];
 
   return (

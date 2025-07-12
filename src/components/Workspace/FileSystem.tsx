@@ -13,7 +13,6 @@ import { BlobReader, Uint8ArrayWriter, ZipReader } from '@zip.js/zip.js';
 import { enqueueSnackbar } from 'notistack';
 import * as React from 'react';
 import { useDropzone } from 'react-dropzone';
-
 import WorkspaceFile from '../../lib/WorkspaceFile';
 import { useFileSystemProvider } from '../providers/FileSystemProvider';
 import ImportFromUrlDialog from './FileSystem/ImportDialog';
@@ -37,7 +36,7 @@ export default function FileSystem() {
             f = new WorkspaceFile([f], f.name, {
               type: 'font',
               lastModified: f.lastModified,
-              path: 'libraries/' + f.path,
+              path: 'fonts/' + f.path.replace(/^\.?\/+/, '').trim(),
             }) as WorkspaceFile;
           } else if (f.name.match(/\.(zip)$/i)) {
             const files = await new ZipReader(new BlobReader(f)).getEntries();

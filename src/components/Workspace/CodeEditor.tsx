@@ -1,33 +1,18 @@
 import { Alert, AlertTitle, SelectChangeEvent } from '@mui/material';
 import React from 'react';
-
-import { useFileSystemProvider } from '../providers/FileSystemProvider';
 import { useWorkspaceProvider } from '../providers/WorkspaceProvider';
-import FileSelector from './FileSystem/FileSelector';
 
 interface CodeEditorProps {
-  disabled?: boolean;
+  onChange?: (code: string) => void;
 }
 
-export default function CodeEditor({ disabled }: CodeEditorProps) {
-  const { code, setCode, selectedFile, setSelectedFile } =
+export default function CodeEditor({ onChange }: CodeEditorProps) {
+  const { code, setCode } =
     useWorkspaceProvider();
-  const { files } = useFileSystemProvider();
 
   const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCode(event.target.value);
-  };
-
-  // Load the selected file.
-  const handleFileSelect = (event: SelectChangeEvent<string>) => {
-    const file = files.find((f) => f.path === event.target.value);
-
-    if (file) {
-      (async () => {
-        setCode(await file.text());
-        setSelectedFile(file.path);
-      })();
-    }
+    onChange(event.target.value);
   };
 
   return (
@@ -36,9 +21,7 @@ export default function CodeEditor({ disabled }: CodeEditorProps) {
         <AlertTitle>Code Editor</AlertTitle>
         Edit the code to your liking.
       </Alert>
-      <FileSelector onChange={handleFileSelect} selectedFile={selectedFile} />
       <textarea
-        readOnly={disabled}
         value={code}
         onChange={handleCodeChange}
         style={{
@@ -46,7 +29,7 @@ export default function CodeEditor({ disabled }: CodeEditorProps) {
           flexGrow: 1,
           resize: 'none',
           padding: 12,
-          backgroundColor: disabled ? '#ccc' : '#fff',
+          backgroundColor: '#fff',
         }}
       />
     </div>

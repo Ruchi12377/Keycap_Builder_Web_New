@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
-import * as React from 'react';
+import React, { useEffect, useRef, useState, Fragment, MouseEvent } from 'react';
 
 type Option = {
   label: string;
@@ -27,11 +27,11 @@ export default function SplitButton({
   options,
   startIcon,
 }: Props) {
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSelectedIndex(options.findIndex((option) => !option.disabled));
   }, [options]);
 
@@ -43,7 +43,7 @@ export default function SplitButton({
   };
 
   const handleMenuItemClick = (
-    event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    _event: MouseEvent<HTMLLIElement, MouseEvent>,
     index: number
   ) => {
     const selected = options[index];
@@ -75,7 +75,7 @@ export default function SplitButton({
       : options[selectedIndex].label;
 
   return (
-    <React.Fragment>
+    <Fragment>
       <ButtonGroup
         variant="contained"
         ref={anchorRef}
@@ -133,6 +133,6 @@ export default function SplitButton({
           </Grow>
         )}
       </Popper>
-    </React.Fragment>
+    </Fragment>
   );
 }

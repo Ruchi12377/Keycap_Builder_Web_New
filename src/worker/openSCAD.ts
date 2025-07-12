@@ -27,7 +27,7 @@ class OpenSCADWrapper {
       printErr: this.logger('stdErr'),
     });
     if (!defaultFont) {
-      const fontResponse = await fetch('LiberationSans-Regular.ttf');
+      const fontResponse = await fetch('/fonts/LiberationSans-Regular.ttf');
       defaultFont = await fontResponse.arrayBuffer();
     }
 
@@ -97,10 +97,6 @@ class OpenSCADWrapper {
     const parameters = data.params.map(({ name, type, value }) => {
       if (type === 'string' && typeof value === 'string') {
         value = this.escapeShell(value);
-      } else if (type === 'number[]' && Array.isArray(value)) {
-        value = `[${value.join(',')}]`;
-      } else if (type === 'string[]' && Array.isArray(value)) {
-        value = `[${value.map((item) => this.escapeShell(item)).join(',')}]`;
       }
 
       return `-D${name}=${value}`;
@@ -248,7 +244,7 @@ class OpenSCADWrapper {
     } catch (error) {
       throw new Error(
         'OpenSCAD exited with an error: ' +
-          (error.message ? error.message : error)
+        (error.message ? error.message : error)
       );
     }
 

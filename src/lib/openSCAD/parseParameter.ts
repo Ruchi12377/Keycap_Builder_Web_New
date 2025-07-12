@@ -12,16 +12,14 @@ type ParameterRange = {
 type ParameterType =
   | 'string'
   | 'number'
-  | 'boolean'
-  | 'string[]'
-  | 'number[]'
-  | 'boolean[]';
+  | 'boolean';
 
 export type Parameter = {
   name: string;
   type: ParameterType;
   value: string | boolean | number | string[] | number[] | boolean[];
   description?: string;
+  isFont: boolean;
   group?: string;
   range?: ParameterRange;
   options?: ParameterOption[];
@@ -78,6 +76,10 @@ export default function parseParameters(script: string): Parameter[] {
     let match;
     while ((match = parameterRegex.exec(groupSection.code)) !== null) {
       const name = match[1];
+      if (name[0] == "$") {
+        // Skip parameters that start with a dollar sign
+        continue
+      }
       const value = match[2];
       const typeAndValue = convertType(value);
 
@@ -88,6 +90,7 @@ export default function parseParameters(script: string): Parameter[] {
 
       let description: string;
       let options: ParameterOption[];
+      let isFont = false;
       let range: ParameterRange;
 
       // Check if the value is another variable or an expression. If so, we can continue to the next
@@ -113,7 +116,12 @@ export default function parseParameters(script: string): Parameter[] {
           } else {
             range = { step: parseFloat(cleaned) };
           }
-        } else if (rawComment.startsWith('[') && cleaned.includes(',')) {
+        }
+        else if (rawComment.startsWith("font")) {
+          options = [];
+          isFont = true;
+        }
+        else if (rawComment.startsWith('[') && cleaned.includes(',')) {
           // If the options contain commas, we assume that those are options for a select element.
           options = cleaned
             .trim()
@@ -171,6 +179,7 @@ export default function parseParameters(script: string): Parameter[] {
       parameters[name] = {
         description,
         group: groupSection.group,
+        isFont,
         name,
         range,
         options,
@@ -192,31 +201,6 @@ function convertType(rawValue): {
   } else if (rawValue === 'true' || rawValue === 'false') {
     // Raw value matches `true` or `false`.
     return { value: rawValue === 'true', type: 'boolean' };
-  } else if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
-    // Raw values is an array
-    const arrayValue = rawValue
-      .slice(1, -1)
-      .split(',')
-      .map((item) => item.trim());
-
-    if (arrayValue.every((item) => /^\d+(\.\d+)?$/.test(item))) {
-      return {
-        value: arrayValue.map((item) => parseFloat(item)),
-        type: 'number[]',
-      };
-    } else if (arrayValue.every((item) => /^".*"$/.test(item))) {
-      return {
-        value: arrayValue.map((item) => item.slice(1, -1)),
-        type: 'string[]',
-      };
-    } else if (
-      arrayValue.every((item) => item === 'true' || item === 'false')
-    ) {
-      return {
-        value: arrayValue.map((item) => item === 'true'),
-        type: 'boolean[]',
-      };
-    }
   } else {
     // Remove quotes
     rawValue = rawValue.replace(/^"(.*)"$/, '$1');
