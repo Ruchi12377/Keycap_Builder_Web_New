@@ -1,6 +1,7 @@
 import { Alert, AlertTitle, SelectChangeEvent } from '@mui/material';
 import React from 'react';
 import { useWorkspaceProvider } from '../providers/WorkspaceProvider';
+import { Editor } from '@monaco-editor/react';
 
 interface CodeEditorProps {
   onChange?: (code: string) => void;
@@ -21,17 +22,8 @@ export default function CodeEditor({ onChange }: CodeEditorProps) {
         <AlertTitle>Code Editor</AlertTitle>
         Edit the code to your liking.
       </Alert>
-      <textarea
-        value={code}
-        onChange={handleCodeChange}
-        style={{
-          width: '100%',
-          flexGrow: 1,
-          resize: 'none',
-          padding: 12,
-          backgroundColor: '#fff',
-        }}
-      />
+      <Editor height="90vh" defaultLanguage="openscad" defaultValue={code}
+        onChange={() => handleCodeChange} />;
     </div>
   );
 }

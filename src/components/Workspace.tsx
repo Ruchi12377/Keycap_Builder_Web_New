@@ -13,8 +13,10 @@ import Sidebar from './Workspace/Sidebar';
 import { useOpenSCADProvider } from './providers/OpenscadWorkerProvider';
 import { useWorkspaceProvider } from './providers/WorkspaceProvider';
 import { useFileSystemProvider } from './providers/FileSystemProvider';
+import Legend from './Workspace/Legend';
 
 export type EditorMode =
+  | 'legend'
   | 'editor'
   | 'customizer'
   | 'file';
@@ -82,6 +84,9 @@ export default function Workspace() {
           size={{ xs: 4 }}
           sx={{ borderRight: 1, height: '80%', borderColor: '#ccc', pt: 2 }}
         >
+          {mode === 'legend' && (
+            <Legend />
+          )}
           {mode === 'customizer' && (
             <Customizer
               parameters={parameters}
