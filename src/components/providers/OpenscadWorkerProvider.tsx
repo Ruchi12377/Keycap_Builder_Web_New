@@ -104,7 +104,6 @@ export default function OpenscadWorkerProvider({ children }: Props) {
     reset: () => {
       setLog([]);
       setPreviewFile(null);
-      setExportFile(null);
       setIsExporting(false);
       setIsRendering(false);
       setParameters([]);
