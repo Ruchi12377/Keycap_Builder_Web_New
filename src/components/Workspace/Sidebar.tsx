@@ -26,8 +26,8 @@ export default function Sidebar({ onChange, mode }: Props) {
   };
 
   const buttons = [
+    { value: "legend", icon: <FontDownloadIcon />, label: "Legend" },
     { value: "customizer", icon: <TuneIcon />, label: "Customizer" },
-    { value: "fonts", icon: <FontDownloadIcon />, label: "Fonts" },
     { value: "editor", icon: <CodeIcon />, label: "Script Editor" },
     { value: "file", icon: <FolderIcon />, label: "File Manager" },
   ];
