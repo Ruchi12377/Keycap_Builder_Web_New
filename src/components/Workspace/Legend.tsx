@@ -2,24 +2,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { Alert, AlertTitle, Button, Checkbox, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import React, { useState } from 'react';
+import React from 'react';
+import { LegendItem } from '../Workspace';
 
-// Define the interface for legend item
-interface LegendItem {
-  id: string;
-  main: string;
-  shift: string;
-  fn: string;
-  bump: boolean;
-  center: boolean;
-}
-
-export default function Legend() {
-  // State to store legend items
-  const [legendItems, setLegendItems] = useState<LegendItem[]>([
-    { id: '1', main: '', shift: '', fn: '', bump: false, center: false }
-  ]);
-
+export default function Legend({ legendItems, setLegendItems }:
+  {
+    legendItems: LegendItem[];
+    setLegendItems: React.Dispatch<React.SetStateAction<LegendItem[]>>;
+  }
+) {
   // Function to handle text change
   const handleTextChange = (id: string, field: 'main' | 'shift' | 'fn', value: string) => {
     setLegendItems(prevItems =>

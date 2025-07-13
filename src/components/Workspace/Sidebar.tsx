@@ -1,7 +1,6 @@
 import CodeIcon from '@mui/icons-material/Code';
 import FolderIcon from '@mui/icons-material/Folder';
 import FontDownloadIcon from '@mui/icons-material/FontDownload';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import TuneIcon from '@mui/icons-material/Tune';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';

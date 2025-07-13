@@ -76,15 +76,6 @@ export default function parseParameters(script: string): Parameter[] {
     let match;
     while ((match = parameterRegex.exec(groupSection.code)) !== null) {
       const name = match[1];
-      if (name.startsWith("$")) {
-        // Skip parameters that start with a dollar sign
-        continue
-      }
-      if (name.startsWith("per_")) {
-        // Skip parameters that start with "per_"
-        // This is hydrated when the keycap is generated
-        continue
-      }
       const value = match[2];
       const typeAndValue = convertType(value);
 

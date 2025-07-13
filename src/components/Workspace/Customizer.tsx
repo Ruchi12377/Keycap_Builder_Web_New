@@ -78,7 +78,7 @@ export default function Customizer({ parameters, onChange }: Props) {
   // Group parameters
   const groups = useMemo(
     () =>
-      parameters.reduce((acc, parameter) => {
+      parameters.filter(x => x.name.startsWith("$") == false && x.name.startsWith("per_") == false).reduce((acc, parameter) => {
         if (parameter.group) {
           if (!acc[parameter.group]) {
             acc[parameter.group] = [];

@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Parameter } from '../lib/openSCAD/parseParameter';
 import parseOpenScadParameters from '../lib/openSCAD/parseParameter';
 import Buttons from './Workspace/Buttons';
@@ -21,12 +21,24 @@ export type EditorMode =
   | 'customizer'
   | 'file';
 
+// Define the interface for legend item
+export interface LegendItem {
+  main: string;
+  shift: string;
+  fn: string;
+  bump: boolean;
+  center: boolean;
+}
+
 export default function Workspace() {
   const { preview, previewFile, isRendering } = useOpenSCADProvider();
   const { files } = useFileSystemProvider();
   const { code } = useWorkspaceProvider();
-  const [mode, setMode] = React.useState<EditorMode>('customizer');
-  const [parameters, setParameters] = React.useState<Parameter[]>([]);
+  const [mode, setMode] = useState<EditorMode>('customizer');
+  const [parameters, setParameters] = useState<Parameter[]>([]);
+  const [legendItems, setLegendItems] = useState<LegendItem[]>([
+    { main: '', shift: '', fn: '', bump: false, center: false }
+  ]);
 
   // Whenever the code changes, attempt to parse the parameters
   useEffect(() => {
@@ -61,16 +73,13 @@ export default function Workspace() {
 
   // Hydrate font options
   useEffect(() => {
-    console.log(parameters.filter((p) => p.isFont));
     parameters.filter((p) => p.isFont).forEach((p) => {
-      console.log(p);
       p.options = files
         .filter((f) => f.type === 'font')
         .map((f) => {
           const nameWithoutExt = f.name.replace(/\.[^/.]+$/, "");
           return { value: nameWithoutExt, label: nameWithoutExt };
         });
-      console.log(p.options);
     });
   }, [files, parameters]);
 
@@ -85,7 +94,7 @@ export default function Workspace() {
           sx={{ borderRight: 1, height: '80%', borderColor: '#ccc', pt: 2 }}
         >
           {mode === 'legend' && (
-            <Legend />
+            <Legend legendItems={legendItems} setLegendItems={setLegendItems} />
           )}
           {mode === 'customizer' && (
             <Customizer
@@ -108,7 +117,7 @@ export default function Workspace() {
             borderColor: '#ccc',
           }}
         >
-          <Buttons code={code} parameters={parameters} />
+          <Buttons code={code} parameters={parameters} legendItems={legendItems} />
         </Grid>
         <Grid
           size={{ xs: 8 }}

@@ -13,8 +13,7 @@ const OpenSCADWorkerContext = createContext<{
     code: string,
     fileType: string,
     params?: OpenSCADWorkerMessageData['params']
-  ) => void;
-  exportFile?: File | null;
+  ) => Promise<File>;
   isExporting?: boolean;
   log?: string[];
   preview?: (
@@ -39,14 +38,12 @@ type Props = {
 export default function OpenscadWorkerProvider({ children }: Props) {
   const [log, setLog] = useState<string[]>([]);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
-  const [exportFile, setExportFile] = useState<File | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [parameters, setParameters] = useState<Parameter[]>([]);
 
   const value = {
     log,
-    exportFile,
     previewFile,
     isExporting,
     isRendering,
@@ -71,10 +68,9 @@ export default function OpenscadWorkerProvider({ children }: Props) {
         ...output.log.stdOut,
       ]);
 
-      if (output.output) {
-        setExportFile(output.output);
-      }
       setIsExporting(false);
+
+      return output.output;
     },
 
     preview: async (

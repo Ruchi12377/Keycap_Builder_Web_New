@@ -1,11 +1,11 @@
 import LoopIcon from '@mui/icons-material/Loop';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import React, { useEffect, useMemo } from 'react';
-
+import React from 'react';
 import { Parameter } from '../../lib/openSCAD/parseParameter';
-import SplitButton from '../SplitButton';
 import { useOpenSCADProvider } from '../providers/OpenscadWorkerProvider';
+import { LegendItem } from '../Workspace';
+import JSZip from 'jszip';
 
 const loopAnimation = {
   animation: 'spin 2s linear infinite',
@@ -22,11 +22,11 @@ const loopAnimation = {
 type Props = {
   code: string;
   parameters: Parameter[];
+  legendItems?: LegendItem[];
 };
 
-export default function Buttons({ code, parameters }: Props) {
+export default function Buttons({ code, parameters, legendItems }: Props) {
   const {
-    exportFile,
     execExport,
     isExporting,
     isRendering,
@@ -37,33 +37,81 @@ export default function Buttons({ code, parameters }: Props) {
   const handleRender = async () => {
     preview(code, parameters);
   };
-  const options = useMemo(() => {
-    const isSVG = previewFile && previewFile.name.endsWith('.svg');
 
-    // TODO: 3MF export was not enabled when building the OpenSCAD wasm module
-    return [
-      { label: 'Export STL', disabled: isSVG },
-      { label: 'Export OFF', disabled: isSVG },
-      { label: 'Export AMF', disabled: isSVG },
-      { label: 'Export CSG', disabled: isSVG },
-      { label: 'Export DXF', disabled: !isSVG },
-      { label: 'Export SVG', disabled: !isSVG },
-    ];
-  }, [previewFile]);
+  /**
+ * Makes a string safe for use in filenames by replacing unsafe characters
+ */
+  const makeFilenameSafe = (name: string): string => {
+    return name
+      .replace(/\//g, "slash")
+      .replace(/\\/g, "backslash")
+      .replace(/:/g, "colon")
+      .replace(/\*/g, "asterisk")
+      .replace(/\?/g, "question")
+      .replace(/"/g, "quote")
+      .replace(/</g, "less")
+      .replace(/>/g, "greater")
+      .replace(/\|/g, "pipe");
+  };
 
-  useEffect(() => {
-    if (exportFile) {
-      const url = URL.createObjectURL(exportFile);
-      const link = document.createElement('a');
 
-      link.href = url;
-      link.setAttribute('download', exportFile.name);
-      document.body.appendChild(link);
+  /**
+ * Downloads a file to the user's device
+ */
+  const downloadFile = (filename: string, obj: File | Blob): void => {
+    const url = URL.createObjectURL(obj);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    // Clean up to avoid memory leaks
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  };
 
-      link.click();
-      document.body.removeChild(link);
+
+  async function handleExport() {
+    const exportedFiles: { file: File, name: string }[] = [];
+    for (const item of legendItems) {
+      let main, shift, fn = '';
+      parameters.filter(x => x.name.startsWith("per_")).forEach(param => {
+        switch (param.name) {
+          case 'per_main_text_string':
+            param.value = item.main;
+            main = item.main;
+            break;
+          case 'per_shift_text_string':
+            param.value = item.shift;
+            shift = item.shift;
+            break;
+          case 'per_fn_text_string':
+            param.value = item.fn;
+            fn = item.fn;
+            break;
+          case 'per_homing_dot':
+            param.value = item.bump;
+            break;
+          default:
+            console.log(`${param.name} was not hydrated.`);
+        }
+      });
+      const file = await execExport(code, "stl", parameters);
+      exportedFiles.push({ file, name: makeFilenameSafe(`keycap_${main}_${shift}_${fn}.stl`) });
     }
-  }, [exportFile]);
+
+    // Handle download - single file or zip archive
+    if (exportedFiles.length === 1) {
+      const file = exportedFiles[0];
+      downloadFile(file.name, file.file);
+    } else {
+      const zip = new JSZip();
+      for (const { name, file } of exportedFiles) {
+        zip.file(name, file);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      downloadFile("keycaps.zip", zipBlob);
+    }
+  }
 
   return (
     <Stack direction="row" spacing={2} sx={{ m: 1 }}>
@@ -75,16 +123,15 @@ export default function Buttons({ code, parameters }: Props) {
       >
         Render
       </Button>
-      <SplitButton
+      <Button
         disabled={isRendering || isExporting || !previewFile}
-        options={options}
         startIcon={isExporting && <LoopIcon sx={loopAnimation} />}
-        onSelect={async (selectedLabel: string) => {
-          const fileType = selectedLabel.split(' ')[1].toLowerCase();
-
-          execExport(code, fileType, parameters);
+        onClick={() => {
+          handleExport();
         }}
-      />
+      >
+        Export STL
+      </Button>
     </Stack>
   );
 }
