@@ -1,20 +1,20 @@
-import LoopIcon from '@mui/icons-material/Loop';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import React from 'react';
-import { Parameter } from '../../lib/openSCAD/parseParameter';
-import { useOpenSCADProvider } from '../providers/OpenscadWorkerProvider';
-import { LegendItem } from '../Workspace';
-import JSZip from 'jszip';
+import LoopIcon from "@mui/icons-material/Loop";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import JSZip from "jszip";
+import React from "react";
+import type { Parameter } from "../../lib/openSCAD/parseParameter";
+import type { LegendItem } from "../Workspace";
+import { useOpenSCADProvider } from "../providers/OpenscadWorkerProvider";
 
 const loopAnimation = {
-  animation: 'spin 2s linear infinite',
-  '@keyframes spin': {
-    '0%': {
-      transform: 'rotate(360deg)',
+  animation: "spin 2s linear infinite",
+  "@keyframes spin": {
+    "0%": {
+      transform: "rotate(360deg)",
     },
-    '100%': {
-      transform: 'rotate(0deg)',
+    "100%": {
+      transform: "rotate(0deg)",
     },
   },
 };
@@ -26,21 +26,16 @@ type Props = {
 };
 
 export default function Buttons({ code, parameters, legendItems }: Props) {
-  const {
-    execExport,
-    isExporting,
-    isRendering,
-    previewFile,
-    preview,
-  } = useOpenSCADProvider();
+  const { execExport, isExporting, isRendering, previewFile, preview } =
+    useOpenSCADProvider();
 
   const handleRender = async () => {
     preview(code, parameters);
   };
 
   /**
- * Makes a string safe for use in filenames by replacing unsafe characters
- */
+   * Makes a string safe for use in filenames by replacing unsafe characters
+   */
   const makeFilenameSafe = (name: string): string => {
     return name
       .replace(/\//g, "slash")
@@ -54,10 +49,9 @@ export default function Buttons({ code, parameters, legendItems }: Props) {
       .replace(/\|/g, "pipe");
   };
 
-
   /**
- * Downloads a file to the user's device
- */
+   * Downloads a file to the user's device
+   */
   const downloadFile = (filename: string, obj: File | Blob): void => {
     const url = URL.createObjectURL(obj);
     const a = document.createElement("a");
@@ -68,34 +62,39 @@ export default function Buttons({ code, parameters, legendItems }: Props) {
     setTimeout(() => URL.revokeObjectURL(url), 100);
   };
 
-
   async function handleExport() {
-    const exportedFiles: { file: File, name: string }[] = [];
+    const exportedFiles: { file: File; name: string }[] = [];
     for (const item of legendItems) {
-      let main, shift, fn = '';
-      parameters.filter(x => x.name.startsWith("per_")).forEach(param => {
+      let main: string;
+      let shift: string;
+      let fn = "";
+
+      for (const param of parameters.filter((x) => x.name.startsWith("per_"))) {
         switch (param.name) {
-          case 'per_main_text_string':
+          case "per_main_text_string":
             param.value = item.main;
             main = item.main;
             break;
-          case 'per_shift_text_string':
+          case "per_shift_text_string":
             param.value = item.shift;
             shift = item.shift;
             break;
-          case 'per_fn_text_string':
+          case "per_fn_text_string":
             param.value = item.fn;
             fn = item.fn;
             break;
-          case 'per_homing_dot':
+          case "per_homing_dot":
             param.value = item.bump;
             break;
           default:
             console.log(`${param.name} was not hydrated.`);
         }
-      });
+      }
       const file = await execExport(code, "stl", parameters);
-      exportedFiles.push({ file, name: makeFilenameSafe(`keycap_${main}_${shift}_${fn}.stl`) });
+      exportedFiles.push({
+        file,
+        name: makeFilenameSafe(`keycap_${main}_${shift}_${fn}.stl`),
+      });
     }
 
     // Handle download - single file or zip archive
@@ -124,13 +123,14 @@ export default function Buttons({ code, parameters, legendItems }: Props) {
         Render
       </Button>
       <Button
+        variant="outlined"
         disabled={isRendering || isExporting || !previewFile}
         startIcon={isExporting && <LoopIcon sx={loopAnimation} />}
         onClick={() => {
           handleExport();
         }}
       >
-        Export STL
+        Export All KeyCap STL
       </Button>
     </Stack>
   );
