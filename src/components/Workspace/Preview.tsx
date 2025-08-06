@@ -25,7 +25,7 @@ export default function Preview() {
     }
 
     (async () => {
-      let newGeometry;
+      let newGeometry: React.SetStateAction<THREE.Group<THREE.Object3DEventMap>>;
 
       if (previewFile.name.endsWith(".stl")) {
         newGeometry = await readFromSTLFile(
@@ -43,7 +43,7 @@ export default function Preview() {
       }
       setGeometry(newGeometry);
     })();
-  }, [previewFile]);
+  }, [previewFile, theme.palette.primary.main, theme.palette.secondary.main]);
 
   const loading = (
     <div
