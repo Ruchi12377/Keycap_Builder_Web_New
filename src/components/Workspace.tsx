@@ -67,7 +67,7 @@ export default function Workspace() {
     if (code?.length && !previewFile && !isRendering) {
       preview(code, newParams);
     }
-  }, [code]);
+  }, [code, parameters, mode, previewFile, isRendering, preview]);
 
   // Hydrate font options
   useEffect(() => {
