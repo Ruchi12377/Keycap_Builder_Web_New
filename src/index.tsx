@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')).render(
     <SnackbarProvider />
     <FileSystemProvider>
       <OpenscadWorkerProvider>
-        <Layout title="OpenSCAD Web GUI">
+        <Layout>
           <App />
         </Layout>
       </OpenscadWorkerProvider>

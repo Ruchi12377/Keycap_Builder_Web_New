@@ -1,24 +1,24 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState } from "react";
 
-import executeOpenSCAD from '../../lib/openSCAD/execute';
-import { Parameter } from '../../lib/openSCAD/parseParameter';
+import executeOpenSCAD from "../../lib/openSCAD/execute";
+import type { Parameter } from "../../lib/openSCAD/parseParameter";
 import {
-  OpenSCADWorkerMessageData,
+  type OpenSCADWorkerMessageData,
   WorkerMessageType,
-} from '../../worker/types';
+} from "../../worker/types";
 
 // Create a context for the web worker
 const OpenSCADWorkerContext = createContext<{
   execExport?: (
     code: string,
     fileType: string,
-    params?: OpenSCADWorkerMessageData['params']
+    params?: OpenSCADWorkerMessageData["params"],
   ) => Promise<File>;
   isExporting?: boolean;
   log?: string[];
   preview?: (
     code: string,
-    params?: OpenSCADWorkerMessageData['params']
+    params?: OpenSCADWorkerMessageData["params"],
   ) => void;
   previewFile?: File | null;
   isRendering?: boolean;
@@ -51,7 +51,7 @@ export default function OpenscadWorkerProvider({ children }: Props) {
     execExport: async (
       code: string,
       fileType: string,
-      params?: OpenSCADWorkerMessageData['params']
+      params?: OpenSCADWorkerMessageData["params"],
     ) => {
       setIsExporting(true);
 
@@ -59,7 +59,7 @@ export default function OpenscadWorkerProvider({ children }: Props) {
         WorkerMessageType.EXPORT,
         code,
         fileType,
-        params
+        params,
       );
 
       setLog((prevLog) => [
@@ -75,15 +75,15 @@ export default function OpenscadWorkerProvider({ children }: Props) {
 
     preview: async (
       code: string,
-      params?: OpenSCADWorkerMessageData['params']
+      params?: OpenSCADWorkerMessageData["params"],
     ) => {
       setIsRendering(true);
 
       const output = await executeOpenSCAD(
         WorkerMessageType.PREVIEW,
         code,
-        'stl',
-        params
+        "stl",
+        params,
       );
 
       setLog((prevLog) => [

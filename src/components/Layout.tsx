@@ -10,8 +10,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ImportFromUrlDialog from './Layout/ImportFromUrlDialog';
+import { StarOutline } from '@mui/icons-material';
 
 const toolbarHeight = 64; // TODO Will this work everywhere?
 
@@ -20,7 +21,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function Layout({ title, children }: Props) {
+export default function Layout({ children }: Props) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [showImportDialog, setShowImportDialog] = React.useState(false);
 
@@ -44,30 +45,6 @@ export default function Layout({ title, children }: Props) {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar>
-          <IconButton
-            id="menu-button"
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-            onClick={handleClick}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            MenuListProps={{
-              'aria-labelledby': 'menu-button',
-            }}
-          >
-            <MenuItem onClick={handleClose} id="import_from_url">
-              Import from URL
-            </MenuItem>
-          </Menu>
           {showImportDialog && (
             <ImportFromUrlDialog
               onClose={() => {
@@ -75,19 +52,22 @@ export default function Layout({ title, children }: Props) {
               }}
             />
           )}
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            sx={{
-              textDecoration: 'none',
-              boxShadow: 'none',
-              color: 'white',
-            }}
-            href="__WEBSITE_URL"
-          >
-            {title}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <AutoAwesomeIcon/>
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              sx={{
+                textDecoration: 'none',
+                boxShadow: 'none',
+                color: 'white',
+              }}
+              href="__WEBSITE_URL"
+            >
+              KeyCap Builder Web
+            </Typography>
+          </Box>
           <Box component="div" sx={{ flexGrow: 1 }}></Box>
 
           <Tooltip title="Report an issue">

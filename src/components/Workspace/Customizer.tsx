@@ -1,17 +1,18 @@
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Alert, AlertTitle } from '@mui/material';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
-import MenuItem from '@mui/material/MenuItem';
-import TextField from '@mui/material/TextField';
-import { MuiChipsInput } from 'mui-chips-input';
-import React, { useMemo } from 'react';
-
-import { Parameter } from '../../lib/openSCAD/parseParameter';
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { Alert, AlertTitle } from "@mui/material";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import { MuiChipsInput } from "mui-chips-input";
+// biome-ignore lint/style/useImportType: <explanation>
+import React from "react";
+import { useMemo } from "react";
+import type { Parameter } from "../../lib/openSCAD/parseParameter";
 
 type Parameters = Parameter[];
 
@@ -21,14 +22,14 @@ type Props = {
 };
 
 const validateNumber = (value) => {
-  if (isNaN(Number(value))) {
-    return { isError: true, textError: 'Input must be a number' };
+  if (Number.isNaN(Number(value))) {
+    return { isError: true, textError: "Input must be a number" };
   }
   return true;
 };
 
 const validateBoolean = (value) => {
-  if (value !== 'true' && value !== 'false') {
+  if (value !== "true" && value !== "false") {
     return {
       isError: true,
       textError: `Input must be a boolean (i.e. 'true' or 'false')`,
@@ -41,19 +42,23 @@ export default function Customizer({ parameters, onChange }: Props) {
   const changeParameter = (name: string, newValue?) => {
     const newParameters = parameters.map((parameter) => {
       if (parameter.name === name) {
-        if (parameter.type === 'number') {
-          newValue = Number(newValue);
-        } else if (parameter.type === 'boolean') {
-          newValue = Boolean(newValue);
-        } else if (parameter.type === 'number[]') {
-          newValue = newValue.map(Number);
-        } else if (parameter.type === 'boolean[]') {
-          newValue = newValue.map((v) => v === 'true');
+        let updatedValue = newValue;
+        if (parameter.type === "number") {
+          updatedValue = Number(newValue);
+        }
+        if (parameter.type === "boolean") {
+          updatedValue = Boolean(newValue);
+        }
+        if (parameter.type === "number[]") {
+          updatedValue = newValue.map(Number);
+        }
+        if (parameter.type === "boolean[]") {
+          updatedValue = newValue.map((v) => v === "true");
         }
 
         return {
           ...parameter,
-          value: newValue,
+          value: updatedValue,
         };
       }
       return parameter;
@@ -62,7 +67,7 @@ export default function Customizer({ parameters, onChange }: Props) {
   };
 
   const handleParameterChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     changeParameter(event.target.name, event.target.value);
   };
@@ -78,29 +83,35 @@ export default function Customizer({ parameters, onChange }: Props) {
   // Group parameters
   const groups = useMemo(
     () =>
-      parameters.filter(x => x.name.startsWith("$") == false && x.name.startsWith("per_") == false).reduce((acc, parameter) => {
-        if (parameter.group) {
-          if (!acc[parameter.group]) {
-            acc[parameter.group] = [];
+      parameters
+        .filter(
+          (x) =>
+            x.name.startsWith("$") === false &&
+            x.name.startsWith("per_") === false,
+        )
+        .reduce((acc, parameter) => {
+          if (parameter.group) {
+            if (!acc[parameter.group]) {
+              acc[parameter.group] = [];
+            }
+            acc[parameter.group].push(parameter);
+          } else {
+            acc[""] = acc[""] || [];
+            acc[""].push(parameter);
           }
-          acc[parameter.group].push(parameter);
-        } else {
-          acc[''] = acc[''] || [];
-          acc[''].push(parameter);
-        }
-        return acc;
-      }, {}) as { [key: string]: Parameters },
-    [parameters]
+          return acc;
+        }, {}) as { [key: string]: Parameters },
+    [parameters],
   );
 
   return (
-    <div style={{ height: '100%', overflow: 'scroll' }}>
+    <div style={{ height: "100%", overflow: "scroll" }}>
       <Alert severity="info" sx={{ mb: 1 }}>
         <AlertTitle>Customizer</AlertTitle>
         Adjust the parameters of your design.
       </Alert>
       {Object.entries(groups)
-        .filter((x) => x[0].toLowerCase() !== 'hidden')
+        .filter((x) => x[0].toLowerCase() !== "hidden")
         .map(([groupName, groupParams], idx) => (
           <Accordion defaultExpanded={idx === 0} key={idx}>
             <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
@@ -109,10 +120,11 @@ export default function Customizer({ parameters, onChange }: Props) {
             <AccordionDetails>
               {groupParams.map((parameter) => {
                 if (
-                  parameter.type === 'number' ||
-                  parameter.type === 'string'
+                  parameter.type === "number" ||
+                  parameter.type === "string"
                 ) {
                   if (parameter.options) {
+                    console.log(parameter.options);
                     return (
                       <TextField
                         select
@@ -153,7 +165,8 @@ export default function Customizer({ parameters, onChange }: Props) {
                       sx={{ mt: 2, p: 1 }}
                     />
                   );
-                } else if (parameter.type === 'boolean') {
+                }
+                if (parameter.type === "boolean") {
                   return (
                     <FormGroup key={parameter.name}>
                       <FormControlLabel
@@ -168,17 +181,19 @@ export default function Customizer({ parameters, onChange }: Props) {
                       />
                     </FormGroup>
                   );
-                } else if (
-                  parameter.type === 'number[]' ||
-                  parameter.type === 'string[]' ||
-                  parameter.type === 'boolean[]'
+                }
+
+                if (
+                  parameter.type === "number[]" ||
+                  parameter.type === "string[]" ||
+                  parameter.type === "boolean[]"
                 ) {
-                  const type = parameter.type.replace('[]', '');
+                  const type = parameter.type.replace("[]", "");
                   let validate;
 
-                  if (type === 'number') {
+                  if (type === "number") {
                     validate = validateNumber;
-                  } else if (type === 'boolean') {
+                  } else if (type === "boolean") {
                     validate = validateBoolean;
                   }
 
@@ -194,9 +209,9 @@ export default function Customizer({ parameters, onChange }: Props) {
                         return (
                           <Component
                             key={key}
-                            {...chipProps}
-                            title={chipProps.title.toString()}
-                            label={chipProps.label.toString()}
+                            {...(chipProps as any)}
+                            title={chipProps?.title?.toString?.() ?? ""}
+                            label={chipProps?.label?.toString?.() ?? ""}
                           />
                         );
                       }}

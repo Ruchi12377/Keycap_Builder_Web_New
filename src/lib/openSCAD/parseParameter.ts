@@ -10,9 +10,12 @@ type ParameterRange = {
 };
 
 type ParameterType =
-  | 'string'
-  | 'number'
-  | 'boolean';
+  | "string"
+  | "number"
+  | "boolean"
+  | "string[]"
+  | "number[]"
+  | "boolean[]";
 
 export type Parameter = {
   name: string;
@@ -39,7 +42,7 @@ export default function parseParameters(script: string): Parameter[] {
 
   const groupSections: { id: string; group: string; code: string }[] = [
     {
-      id: '',
+      id: "",
       group: undefined,
       code: script,
     },
@@ -51,7 +54,7 @@ export default function parseParameters(script: string): Parameter[] {
     groupSections.push({
       id: tmpGroup[0],
       group: tmpGroup[1].trim(),
-      code: '',
+      code: "",
     });
   }
 
@@ -68,7 +71,7 @@ export default function parseParameters(script: string): Parameter[] {
   if (groupSections.length > 1) {
     groupSections[0].code = script.substring(
       0,
-      script.indexOf(groupSections[1].id)
+      script.indexOf(groupSections[1].id),
     );
   }
 
@@ -93,57 +96,58 @@ export default function parseParameters(script: string): Parameter[] {
       // parameter because everything after this variable (including itself) is not a parameter. Also
       // check if the value is a string that contains a newline. If so, we will also abort the parsing
       if (
-        value !== 'true' && // true and false are valid values
-        value !== 'false' &&
-        (value.match(/^[a-zA-Z_]/) || value.split('\n').length > 1)
+        value !== "true" && // true and false are valid values
+        value !== "false" &&
+        (value.match(/^[a-zA-Z_]/) || value.split("\n").length > 1)
       ) {
         continue;
       }
 
       if (match[3]) {
-        const rawComment = match[3].replace(/^\/\/\s*/, '').trim();
-        const cleaned = rawComment.replace(/^\[+|\]+$/g, '');
+        const rawComment = match[3].replace(/^\/\/\s*/, "").trim();
+        const cleaned = rawComment.replace(/^\[+|\]+$/g, "");
 
         if (!isNaN(rawComment)) {
           // If the cleaned comment is a number, then we assume that it is a step
           // value (or maximum length in case of a string)
-          if (typeAndValue.type === 'string') {
-            range = { max: parseFloat(cleaned) };
+          if (typeAndValue.type === "string") {
+            range = { max: Number.parseFloat(cleaned) };
           } else {
-            range = { step: parseFloat(cleaned) };
+            range = { step: Number.parseFloat(cleaned) };
           }
-        }
-        else if (rawComment.startsWith("font")) {
+        } else if (rawComment.startsWith("font")) {
           options = [];
           isFont = true;
-        }
-        else if (rawComment.startsWith('[') && cleaned.includes(',')) {
+        } else if (rawComment.startsWith("[") && cleaned.includes(",")) {
           // If the options contain commas, we assume that those are options for a select element.
           options = cleaned
             .trim()
-            .split(',')
+            .split(",")
             .map((option) => {
-              const parts = option.trim().split(':');
+              const parts = option.trim().split(":");
               let value = parts[0];
               const label = parts[1];
-              if (typeAndValue.type === 'number') {
-                value = parseFloat(value);
+              if (typeAndValue.type === "number") {
+                value = Number.parseFloat(value);
               }
 
               return { value, label };
             });
         } else if (cleaned.match(/([0-9]+:?)+/)) {
           // If the cleaned comment contains a colon, we assume that it is a range
-          const [min, maxOrStep, max] = cleaned.trim().split(':');
+          const [min, maxOrStep, max] = cleaned.trim().split(":");
 
           if (min && (maxOrStep || max)) {
-            range = { min: parseFloat(min) };
+            range = { min: Number.parseFloat(min) };
           }
           if (max || maxOrStep || min) {
-            range = { ...range, max: parseFloat(max || maxOrStep || min) };
+            range = {
+              ...range,
+              max: Number.parseFloat(max || maxOrStep || min),
+            };
           }
           if (max && maxOrStep) {
-            range = { ...range, step: parseFloat(maxOrStep) };
+            range = { ...range, step: Number.parseFloat(maxOrStep) };
           }
         }
       }
@@ -152,20 +156,20 @@ export default function parseParameters(script: string): Parameter[] {
       // by splitting the script at the parameter definition and using the last line
       // before the definition.
       let above = script.split(
-        new RegExp(`^${escapeRegExp(match[0])}`, 'gm')
+        new RegExp(`^${escapeRegExp(match[0])}`, "gm"),
       )[0];
 
       // Remove only the last newline if it exists. If we would remove more than one
       // newline, we could remove an empty comment and use the comment above that.
-      if (above.endsWith('\n')) {
+      if (above.endsWith("\n")) {
         above = above.slice(0, -1);
       }
 
-      const splitted = above.split('\n').reverse();
+      const splitted = above.split("\n").reverse();
 
       const lastLineBeforeDefinition = splitted[0];
-      if (lastLineBeforeDefinition.trim().startsWith('//')) {
-        description = lastLineBeforeDefinition.replace(/^\/\/\/*\s*/, '');
+      if (lastLineBeforeDefinition.trim().startsWith("//")) {
+        description = lastLineBeforeDefinition.replace(/^\/\/\/*\s*/, "");
         if (description.length === 0) {
           description = undefined;
         }
@@ -193,18 +197,18 @@ function convertType(rawValue): {
 } {
   if (/^-?\d*(\.\d+)?$/.test(rawValue)) {
     // Raw value matches something like `123.123` or `123`.
-    return { value: parseFloat(rawValue), type: 'number' };
-  } else if (rawValue === 'true' || rawValue === 'false') {
+    return { value: Number.parseFloat(rawValue), type: "number" };
+  } else if (rawValue === "true" || rawValue === "false") {
     // Raw value matches `true` or `false`.
-    return { value: rawValue === 'true', type: 'boolean' };
+    return { value: rawValue === "true", type: "boolean" };
   } else {
     // Remove quotes
-    rawValue = rawValue.replace(/^"(.*)"$/, '$1');
-    return { value: rawValue, type: 'string' };
+    rawValue = rawValue.replace(/^"(.*)"$/, "$1");
+    return { value: rawValue, type: "string" };
   }
 }
 
 // https://stackoverflow.com/a/6969486/1706846
 function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }

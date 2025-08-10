@@ -9,15 +9,30 @@ import {
 import React, { useEffect } from "react";
 import type * as THREE from "three";
 
+import type { LegendItem } from "../Workspace";
 import { useOpenSCADProvider } from "../providers/OpenscadWorkerProvider";
 import ThreeJsCanvas from "./Preview/ThreeJsCanvas";
 import readFromSTLFile from "./Preview/readFromSTLFile";
 import readFromSVGFile from "./Preview/readFromSVGFile";
 
-export default function Preview() {
+interface PreviewProps {
+  legendItems: LegendItem[];
+  onLegendChange?: (legendItem: LegendItem) => void;
+}
+
+export default function Preview({ legendItems, onLegendChange }: PreviewProps) {
   const { previewFile, isRendering } = useOpenSCADProvider();
   const [geometry, setGeometry] = React.useState<THREE.Group | null>(null);
+  const [selectedLegendId, setSelectedLegendId] = React.useState<string>("");
   const theme = useTheme();
+
+  const handleLegendChange = (legendId: string) => {
+    setSelectedLegendId(legendId);
+    const selectedLegend = legendItems.find(item => item.id === legendId);
+    if (selectedLegend && onLegendChange) {
+      onLegendChange(selectedLegend);
+    }
+  };
 
   useEffect(() => {
     if (!previewFile) {
@@ -87,18 +102,24 @@ export default function Preview() {
           backgroundColor: "rgba(255, 255, 255, 0.7)",
           borderRadius: "4px",
           padding: "5px",
+          display: "flex",
+          gap: "10px",
         }}
       >
         <FormControl size="small" variant="outlined">
           <Select
+            value={selectedLegendId}
+            onChange={(e) => handleLegendChange(e.target.value)}
             displayEmpty
-            inputProps={{ "aria-label": "View options" }}
+            inputProps={{ "aria-label": "Legend selection" }}
             sx={{ minWidth: "120px" }}
           >
-            <MenuItem value="standard">標準ビュー</MenuItem>
-            <MenuItem value="top">上から</MenuItem>
-            <MenuItem value="front">正面</MenuItem>
-            <MenuItem value="side">側面</MenuItem>
+            <MenuItem value="">レジェンドを選択</MenuItem>
+            {legendItems.map((item) => (
+              <MenuItem key={item.id} value={item.id}>
+                {item.main} {item.shift} {item.fn}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>
